@@ -1,37 +1,49 @@
 import datetime
 import numpy as np
+from pydetgen.objects import ConfigBlock
+
+_INDENT_N_SPACES = 2
+_INDENT_STR = " " * _INDENT_N_SPACES
 
 
-def get_geom_lines(geoms: np.ndarray) -> list[str]:
-    geoms_lines = []
-    for geoms in geoms:
-        geoms_lines.append("[" + ", ".join(str(el) for el in geoms) + "]")
-    return geoms_lines
+def dump_array_1D(data: np.ndarray, level: int = 0) -> str:
+    indent = _INDENT_STR * level
+    return indent + np.array2string(data, separator=", ")
 
 
-def get_active_det_idx_line(active_det_idx: np.ndarray) -> str:
-    return (
-        "active geometry indices: [" + ", ".join(str(el) for el in active_det_idx) + "]"
-    )
+def dump_array_2D(data: np.ndarray, level: int = 0) -> str:
+    rows = []
+    indent = _INDENT_STR * level
+    for row in data:
+        rows.append(indent + _INDENT_STR + np.array2string(row, separator=", "))
+
+    output = indent + "[\n"
+    output += ",\n".join(rows)
+    output += "\n" + indent + "]"
+    return output
 
 
-def get_nsubdivs_line(nsubs: np.ndarray) -> str:
-    return "N-subdivision xyz: [%d, %d, %d]" % (nsubs[0], nsubs[1], nsubs[2])
+def dump_block(obj: ConfigBlock, level: int = 0) -> str:
+    indent = _INDENT_STR * level
+    output = indent + obj.objname + ":"
 
-
-def get_detector_block(
-    plate_geoms: np.ndarray,
-    det_geoms: np.ndarray,
-    det_nsubs: np.ndarray,
-    active_det_idx: np.ndarray,
-) -> str:
-    detector_block = ["detector geometry:"]
-    plate_geoms_lines = get_geom_lines(plate_geoms)
-    det_geoms_lines = get_geom_lines(det_geoms)
-    if len(plate_geoms_lines) != 0:
-        detector_block.append(",\n".join(el for el in plate_geoms_lines))
-
-    return "\n".join(detector_block)
+    if obj.datatype == "array 1D":
+        assert len(obj.data.shape) == 1
+        output += "\n"
+        output += dump_array_1D(obj.data, level + 1)
+    elif obj.datatype == "array 2D":
+        assert len(obj.data.shape) == 2
+        output += "\n"
+        output += dump_array_2D(obj.data, level + 1)
+    elif obj.datatype == "object":
+        output += "\n"
+        blocks = [dump_block(block_obj, level + 1) for block_obj in obj.data]
+        output += "\n".join(blocks)
+    elif obj.datatype in ["string", "number", "integer", "boolean"]:
+        output += " " + str(obj.data)
+    else:
+        raise ValueError(f"Unknown data type: {obj.datatype}")
+    return output
 
 
 def write(
