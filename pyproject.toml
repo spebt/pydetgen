@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors = [{ name = "Fang Han", email = "fhan0904@gmail.com" }]
-dependencies = ["numpy", "pyyaml", "plotly"]
+dependencies = ["numpy", "pyyaml","jsonschema"]
 name = "pydetgen"
 dynamic = ["version"]
 description = "Python package for generating detector configuration"
@@ -25,4 +25,8 @@ Documentation = "https://spebt.github.io/pydetgen/"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["pydetgen"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["pydetgen"]
+namespaces = false
