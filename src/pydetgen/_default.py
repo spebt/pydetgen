@@ -3,8 +3,8 @@ import numpy as np
 
 
 def default_config():
-    det_geoms = get_det_geoms(0.475, np.array([[1.2, 8, 0]]), np.array([3, 2, 1]))
-    plate_geoms = get_plate_geoms_2d(3.5, 0, 16, np.array([2]), np.array([8]), 0, 1, 1)
+    det_geoms = get_detector_units(0.475, np.array([[1.2, 8, 0]]), np.array([3, 2, 1]))
+    plate_geoms = get_plate(3.5, 0, 16, np.array([2]), np.array([8]), 0, 1, 1)
     config_detector = {
         "detector": {
             "detector geometry": np.append(plate_geoms,det_geoms,axis=0).tolist(),

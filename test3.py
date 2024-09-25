@@ -5,6 +5,6 @@ import yaml
 with open('test2.yaml', 'r') as f:
     config = yaml.safe_load(f)
     try:
-        spebtschema.yaml.validate(config, name='main.json')
+        spebtschema.yaml.validate(config, name='main')
     except Exception as e:
         raise e

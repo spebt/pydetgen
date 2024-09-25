@@ -20,7 +20,6 @@ import pydetgen
 config = pydetgen.default_config()
 
 # Modify the configuration
-det_pos = np.array()
 det_geoms = get_det_geoms(0.475, np.array([[1.2, 8, 0]]), np.array([3, 2, 1]))
 plate_geoms = get_plate_geoms_2d(3.5, 0, 16, np.array([2]), np.array([8]), 0, 1, 1)
 config['detector']['detector geometry'] = 

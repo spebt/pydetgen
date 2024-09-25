@@ -1,3 +1,3 @@
-from ._geoms import get_plate_geoms_2d, get_det_geoms
+from ._geoms import get_plate, get_detector_units
 
-__all__ = ["get_plate_geoms_2d", "get_det_geoms"]
+__all__ = ["get_plate", "get_detector_units"]
