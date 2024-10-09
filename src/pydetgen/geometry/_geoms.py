@@ -5,7 +5,7 @@ def get_plate(
     mu: float,
     start_y: float,
     width_y: float,
-    aperture_width: np.ndarray | float,
+    aperture_width,
     aperture_pos: np.ndarray,
     start_x: float,
     thickness_x: float,
@@ -63,9 +63,7 @@ def get_plate(
     return np.round(geoms, decimals=6)
 
 
-def get_detector_units(
-    mu: np.ndarray | float, pos: np.ndarray, dims: np.ndarray
-) -> np.ndarray:
+def get_detector_units(mu, pos: np.ndarray, dims: np.ndarray) -> np.ndarray:
     """
     Calculate the detector units based on the provided positions, dimensions, and mu values.
 
