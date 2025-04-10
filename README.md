@@ -1,4 +1,4 @@
-# PyDetgen
+# PyDetGen
 
 SPEBT project Python package for generating the detector system configuration file
 
@@ -8,3 +8,5 @@ SPEBT project Python package for generating the detector system configuration fi
 - `PyTorch`
 - `NumPy`
 - `Pandas`
+- `Matplotlib`
+
