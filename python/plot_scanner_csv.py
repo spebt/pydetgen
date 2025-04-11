@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     cvs_path = get_cvs_path(sys.argv, script_name=script_name)
     cvbs_path = pydetgen.get_valid_cvs_path(cvs_path)
-    plate_groups = [f"plate_{i}" for i in range(0, 1)]
-    crystal_groups = [f"crystals_{i}" for i in range(0, 1)]
+    plate_groups = [f"plate_{i}" for i in range(0, 6)]
+    crystal_groups = [f"crystals_{i}" for i in range(0, 6)]
     plate_ploygons_tensor = torch.cat(
         list(pydetgen.get_polygon_groups_from_csv(plate_groups, cvs_path))
     )
