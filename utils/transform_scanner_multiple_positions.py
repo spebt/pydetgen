@@ -196,7 +196,7 @@ def main():
 
     # 1. Data Loading
     print(f"Loading base layout: {args.input_file}")
-    scanner_data = torch.load(args.input_file)
+    scanner_data = torch.load(args.input_file, weights_only=False)
     input_md5 = scanner_data.get("scanner MD5", "unknown_md5")
     base_layout = scanner_data["layouts"][f"position {args.base_pos:03d}"]
     base_detectors = base_layout["detector units"]
@@ -265,7 +265,7 @@ def main():
         config_tags.append(mode_tag)
     
     input_basename = os.path.splitext(os.path.basename(args.input_file))[0]
-    output_dir = "../data/scanner_layouts/"
+    output_dir = "/vscratch/grp-rutaoyao/sid/data-test/scanner_layouts/"
     os.makedirs(output_dir, exist_ok=True)
     out_filename = os.path.join(output_dir, f"{input_basename}_{'_'.join(config_tags)}.tensor")
 

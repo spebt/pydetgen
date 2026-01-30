@@ -61,9 +61,9 @@ if __name__ == "__main__":
     }
 
     # --- 5. Save the Layout to a Single .tensor File ---
-    output_dir = "../data/scanner_layouts/"
+    output_dir = "/vscratch/grp-rutaoyao/sid/data-test/scanner_layouts/"
     os.makedirs(output_dir, exist_ok=True)
-    out_file_name = os.path.join(output_dir, "mph_hourglass_single_position_base_2mm_18pinholes.tensor")
+    out_file_name = os.path.join(output_dir, "mph_hourglass_single_position_base_3mm_18pinholes.tensor")
     
     print(f"\nSaving single SPECT layout to:\n  {out_file_name}")
     torch_save(output_data, out_file_name)
