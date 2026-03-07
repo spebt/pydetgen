@@ -174,13 +174,13 @@ def main():
     # --- CONFIGURATION DICTIONARY ---
     CONFIG = {
         "apply_rotations": True,
-        "apply_translations": True,
+        "apply_translations": False,
         "translation_mode": "elliptical", 
         "custom_translations": None, # Used for T4 Protocol if mode is 'custom'
         "rotate_detectors": False,
         "rotate_collimator": True,
         "n_rotations": 0,
-        "custom_rotation_degrees": list(np.arange(0, 20, 4)),
+        "custom_rotation_degrees": list(np.arange(0, 360, 1)),
         "n_shifts": [3, 3],
         "shift_step_mm": [20.0, 20.0],
         "n_transaxial_positions": 8,
@@ -259,13 +259,13 @@ def main():
     # Filename Generation based on active modes
     config_tags = []
     if CONFIG["apply_rotations"]:
-        config_tags.append("rotated")
+        config_tags.append(f"rotated_{n_total_positions}")
     if CONFIG["apply_translations"]:
         mode_tag = CONFIG["translation_mode"] if CONFIG["translation_mode"] != 'grid' else f"{CONFIG['n_shifts'][0]}x{CONFIG['n_shifts'][1]}grid"
         config_tags.append(mode_tag)
     
     input_basename = os.path.splitext(os.path.basename(args.input_file))[0]
-    output_dir = "/vscratch/grp-rutaoyao/sid/data-test/scanner_layouts/"
+    output_dir = "/vscratch/grp-rutaoyao/sid/data/scanner_layouts/"
     os.makedirs(output_dir, exist_ok=True)
     out_filename = os.path.join(output_dir, f"{input_basename}_{'_'.join(config_tags)}.tensor")
 
