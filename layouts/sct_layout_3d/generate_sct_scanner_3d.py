@@ -70,6 +70,9 @@ if __name__ == "__main__":
         "hole_radius_mm":              0.8,   # cylindrical hole radius
         "num_holes":                  1218,   # number of holes (≈12.5% open area)
         "hole_seed":                    42,   # RNG seed for reproducible placement
+        # Polygon-sides for the convex-prism approximation of each cylindrical hole.
+        # 8 → 98.5% area accuracy (fast).  Increase to 12–16 for high-fidelity runs.
+        "hole_n_sides":                  8,
 
         # --- Material attenuation coefficients (mm^-1 at 140 keV) ---
         # Stored here so pymatcal can read them from applied_config instead of hardcoding.
@@ -136,8 +139,9 @@ if __name__ == "__main__":
     holes = generate_sct_collimator_holes(cfg, seed=cfg["hole_seed"])
     print(f"  Holes placed: {holes.shape[0]}")
 
-    print("Generating octagonal prism descriptors for hole voids ...")
-    hole_prisms = generate_sct_hole_prisms(holes)
+    n_sides = cfg["hole_n_sides"]
+    print(f"Generating {n_sides}-sided prism descriptors for hole voids ...")
+    hole_prisms = generate_sct_hole_prisms(holes, n_sides=n_sides)
     print(f"  Prisms generated: {hole_prisms['centers'].shape[0]}")
 
     # FOV box for visualisation — driven by cfg so it always matches the config
