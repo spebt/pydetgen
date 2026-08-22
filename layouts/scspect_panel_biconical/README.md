@@ -9,9 +9,11 @@ geometry used for the ASCI experiment.
   0.25 mm/pixel
 - 36 biconical pinholes, 2 mm diameter and 27 degree opening angle
 - 215 mm collimator junction radius and 8 mm total radial thickness
-- 44 detector panels with an inner slot radius of 757 mm
-- eight radial detector layers with centered tangential populations
+- 44 detector panels whose innermost crystal-layer centers are at 757 mm
+- eight radial detector layers with tangential populations
   `[12, 15, 18, 21, 24, 27, 30, 32]`
+- each layer's crystals are distributed evenly across the same 32 tangential
+  slots; they are not packed contiguously at the panel center
 - 2.4 x 2.4 mm active crystals centered in 3.36 x 3.36 mm slots
 - 7,876 detector crystals in total
 
@@ -34,7 +36,7 @@ python layouts/scspect_panel_biconical/generate_layout.py \
   --output-dir /vscratch/grp-rutaoyao/sid/data/scanner_layouts
 ```
 
-The `applied_config` metadata records the intended 3 x 3 detector and FOV
-subdivisions. Those subdivisions must also be set in the `pymatcal` YAML file;
+The `applied_config` metadata records the intended 3 x 1 detector subdivision
+and 3 x 3 FOV tiling. Those settings must also be set in the `pymatcal` YAML;
 the layout tensor itself contains only physical detector and collimator
 polygons.

@@ -25,14 +25,14 @@ CONFIG = {
     "n_pinholes": 36,
     "collimator_ring_radius_mm": 215.0,
     "collimator_thickness_mm": 8.0,
-    "detector_panel_inner_radius_mm": 757.0,
+    "detector_first_layer_center_radius_mm": 757.0,
     "n_detector_panels": 44,
     "blocks_per_panel": [4, 1],
     "crystals_per_block": [8, 8],
     "crystal_slot_size_mm": [3.36, 3.36],
     "crystal_size_mm": [2.4, 2.4],
     "radial_layer_populations": [12, 15, 18, 21, 24, 27, 30, 32],
-    "detector_subdivisions": [3, 3],
+    "detector_subdivisions": [3, 1],
     "fov_subdivisions": [3, 3],
 }
 
@@ -45,9 +45,14 @@ def build_layout(config: dict = CONFIG) -> dict:
         raise ValueError("FOV y dimension does not match pixel count and pixel size")
 
     detector_units = generate_panel_detectors(
-        detector_panel_inner_radius_mm=config["detector_panel_inner_radius_mm"],
+        detector_first_layer_center_radius_mm=config[
+            "detector_first_layer_center_radius_mm"
+        ],
         n_detector_panels=config["n_detector_panels"],
         radial_layer_populations=config["radial_layer_populations"],
+        tangential_slots_per_panel=(
+            config["blocks_per_panel"][0] * config["crystals_per_block"][0]
+        ),
         crystal_slot_tangential_mm=config["crystal_slot_size_mm"][0],
         crystal_slot_radial_mm=config["crystal_slot_size_mm"][1],
         crystal_tangential_mm=config["crystal_size_mm"][0],
@@ -130,7 +135,7 @@ def plot_layout(output_data: dict, config: dict, output_path: Path) -> None:
             label="70 mm FOV",
         )
     )
-    plot_limit = config["detector_panel_inner_radius_mm"] + (
+    plot_limit = config["detector_first_layer_center_radius_mm"] + (
         len(config["radial_layer_populations"]) + 2
     ) * config["crystal_slot_size_mm"][1]
     axes.set_xlim(-plot_limit, plot_limit)

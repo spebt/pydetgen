@@ -32,9 +32,10 @@ def rotate_polygons(polygons: Tensor, angles_rad: Tensor) -> Tensor:
 
 def generate_panel_detectors(
     *,
-    detector_panel_inner_radius_mm: float,
+    detector_first_layer_center_radius_mm: float,
     n_detector_panels: int,
     radial_layer_populations: Sequence[int],
+    tangential_slots_per_panel: int,
     crystal_slot_tangential_mm: float,
     crystal_slot_radial_mm: float,
     crystal_tangential_mm: float,
@@ -43,13 +44,14 @@ def generate_panel_detectors(
     """Generate the deterministic eight-layer SC-SPECT detector panels.
 
     A base panel is centered on the positive x-axis. Its x coordinate is
-    radial and its y coordinate is tangential. Each radial layer contains a
-    centered contiguous row of crystals, and the complete panel is repeated
-    uniformly around the detector ring.
+    radial and its y coordinate is tangential. Every layer uses the same full
+    32-slot tangential support. Its requested active population is distributed
+    as evenly as possible across those slots, matching the reference Option 2
+    construction instead of packing the crystals into a central wedge.
 
-    ``detector_panel_inner_radius_mm`` locates the inner boundary of the first
-    3.36-mm radial slot. Consequently, the first active crystal face is inset
-    by half of the difference between slot depth and crystal depth.
+    ``detector_first_layer_center_radius_mm`` is the center radius of the
+    innermost crystal layer. Successive layer centers are separated by the
+    radial slot pitch.
     """
     if n_detector_panels <= 0:
         raise ValueError("n_detector_panels must be positive")
@@ -57,6 +59,10 @@ def generate_panel_detectors(
         count <= 0 for count in radial_layer_populations
     ):
         raise ValueError("radial_layer_populations must contain positive counts")
+    if tangential_slots_per_panel <= 0:
+        raise ValueError("tangential_slots_per_panel must be positive")
+    if any(count > tangential_slots_per_panel for count in radial_layer_populations):
+        raise ValueError("a layer population exceeds the available panel slots")
     if crystal_tangential_mm > crystal_slot_tangential_mm:
         raise ValueError("crystal tangential size cannot exceed its slot pitch")
     if crystal_radial_mm > crystal_slot_radial_mm:
@@ -67,12 +73,21 @@ def generate_panel_detectors(
     half_radial = crystal_radial_mm / 2.0
 
     for layer_index, population in enumerate(radial_layer_populations):
-        radial_center = detector_panel_inner_radius_mm + (
-            layer_index + 0.5
-        ) * crystal_slot_radial_mm
+        radial_center = (
+            detector_first_layer_center_radius_mm
+            + layer_index * crystal_slot_radial_mm
+        )
+        slot_indices = torch.linspace(
+            0,
+            tangential_slots_per_panel - 1,
+            steps=population,
+            dtype=torch.float32,
+        ).round().to(torch.int64)
+        if torch.unique(slot_indices).numel() != population:
+            raise RuntimeError("even slot distribution produced duplicate indices")
         tangential_centers = (
-            torch.arange(population, dtype=torch.float32)
-            - (population - 1) / 2.0
+            slot_indices.to(torch.float32)
+            - (tangential_slots_per_panel - 1) / 2.0
         ) * crystal_slot_tangential_mm
 
         layer = torch.empty((population, 4, 2), dtype=torch.float32)
