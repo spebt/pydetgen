@@ -31,33 +31,46 @@ def rotate_and_repeat_4gon(input: Tensor, n: int, step: float) -> Tensor:
     return rotated_vertices
 
 def generate_sc_spect_detectors(cfg: dict) -> Tensor:
-    """Generates the 4 concentric rings of detectors based on the SC-SPECT paper."""
+    """Generate four detector rings assembled from tangential flat cassettes.
+
+    Crystals within a cassette have the configured edge-to-edge tangential
+    air gap. The cassettes are then repeated uniformly around each ring.
+    """
     all_detectors = []
     det_w = cfg["detector_width_mm"]
     det_t = cfg["detector_thickness_mm"]
+    det_gap = cfg["detector_tangential_gap_mm"]
+    n_cassettes = cfg["n_cassette_positions"]
     
     for r_in, n_crystals in zip(cfg["det_rings_r_in"], cfg["det_rings_n_crystals"]):
+        if n_crystals % n_cassettes != 0:
+            raise ValueError("ring crystal count must be divisible by cassette count")
+
         r_out = r_in + det_t
-        r_mid = r_in + (det_t / 2.0)
-        
-        # Angular width of one physical crystal
-        angular_width = det_w / r_mid
-        angle_step = 2 * math.pi / n_crystals
-        
-        # Base crystal centered at angle 0
-        th_start = -angular_width / 2.0
-        th_end = angular_width / 2.0
-        
-        # Use math.cos and math.sin since th_start and th_end are standard Python floats
-        base_crystal = tensor([[
-            [r_in * math.cos(th_start), r_in * math.sin(th_start)],
-            [r_out * math.cos(th_start), r_out * math.sin(th_start)],
-            [r_out * math.cos(th_end),   r_out * math.sin(th_end)],
-            [r_in * math.cos(th_end),   r_in * math.sin(th_end)],
-        ]], dtype=torch.float32)
-        
-        # Rotate and repeat to form the full layer
-        ring_crystals = rotate_and_repeat_4gon(base_crystal, n_crystals, angle_step)
+        crystals_per_cassette = n_crystals // n_cassettes
+        tangential_pitch = det_w + det_gap
+        tangential_centers = (
+            torch.arange(crystals_per_cassette, dtype=torch.float32)
+            - (crystals_per_cassette - 1) / 2.0
+        ) * tangential_pitch
+
+        # Build one flat cassette on the positive X axis. Rotating the whole
+        # cassette preserves the exact gap between adjacent crystals.
+        base_cassette = torch.empty((crystals_per_cassette, 4, 2), dtype=torch.float32)
+        base_cassette[:, 0, 0] = r_in
+        base_cassette[:, 0, 1] = tangential_centers - det_w / 2.0
+        base_cassette[:, 1, 0] = r_out
+        base_cassette[:, 1, 1] = tangential_centers - det_w / 2.0
+        base_cassette[:, 2, 0] = r_out
+        base_cassette[:, 2, 1] = tangential_centers + det_w / 2.0
+        base_cassette[:, 3, 0] = r_in
+        base_cassette[:, 3, 1] = tangential_centers + det_w / 2.0
+
+        ring_crystals = rotate_and_repeat_4gon(
+            base_cassette,
+            n_cassettes,
+            2 * math.pi / n_cassettes,
+        )
         all_detectors.append(ring_crystals)
         
     return torch.cat(all_detectors, dim=0)
